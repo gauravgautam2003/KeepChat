@@ -3,8 +3,8 @@ import { FiEdit2, FiLogOut, FiMoreVertical, FiSearch } from 'react-icons/fi'
 import assets from '../assets/assets'
 import { useNavigate } from 'react-router-dom'
 import { useContext } from 'react'
-import { AuthContext } from '../../context/AuthContext'
-import { ChatContext } from '../../context/ChatContext'
+import { AuthContext } from '../context/AuthContext'
+import { ChatContext } from '../context/ChatContext'
 import { formatLastSeen } from '../lib/utils'
 
 const Sidebar = () => {

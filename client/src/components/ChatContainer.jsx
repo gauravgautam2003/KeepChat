@@ -1,12 +1,14 @@
+'use client'
+
 import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import { BsCheck2, BsCheck2All } from 'react-icons/bs'
 import { FiArrowLeft, FiCheck, FiCheckCircle, FiCircle, FiImage, FiMoreVertical, FiPhone, FiSend, FiTrash2, FiVideo } from 'react-icons/fi'
 import assets from '../assets/assets'
-import CallModal from './CallModal'
+import CallOverlay from './CallOverlay'
 import { formatLastSeen, formatMessageTime } from '../lib/utils'
-import { ChatContext } from '../../context/ChatContext'
-import { AuthContext } from '../../context/AuthContext'
+import { ChatContext } from '../context/ChatContext'
+import { AuthContext } from '../context/AuthContext'
 
 const normalizeId = (value) => {
     if (!value) return ""
@@ -710,7 +712,7 @@ const ChatContainer = () => {
                 </div>
             )}
 
-            <CallModal
+            <CallOverlay
                 session={callSession}
                 localVideoRef={localVideoRef}
                 remoteVideoRef={remoteVideoRef}

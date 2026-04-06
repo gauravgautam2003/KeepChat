@@ -1,6 +1,6 @@
 import { useContext, useState } from 'react'
 import { FiPhone } from 'react-icons/fi'
-import { AuthContext } from '../../context/AuthContext'
+import { AuthContext } from '../context/AuthContext'
 
 
 const LoginPage = () => {
@@ -38,12 +38,12 @@ const LoginPage = () => {
                         <div className='flex items-center gap-3'>
                             <img src="/favicon.svg" alt="QuickChat" className='h-10 w-10 rounded-full' />
                             <div>
-                                <p className='text-base font-semibold text-[#111b21]'>KeepChat</p>
+                                <p className='text-xs font-semibold text-[#111b21]'>KeepChat</p>
                                 <p className='text-xs text-[#667781]'>Use KeepChat on your browser</p>
                             </div>
                         </div>
                         <div className='space-y-4'>
-                            <h1 className='max-w-lg text-3xl font-light leading-tight text-[#111b21]'>Simple. Secure. Ready to chat.</h1>
+                            <h1 className='max-w-lg text-2xl font-light leading-tight text-[#111b21]'>Simple. Secure. Ready to chat.</h1>
                             <p className='max-w-xl text-sm leading-6 text-[#41525d]'>
                                 Clean sign in and sign up flow like WhatsApp Web, so that users can go directly to conversations.
                             </p>
@@ -64,7 +64,7 @@ const LoginPage = () => {
                                 <img src="/favicon.svg" alt="QuickChat" className='h-9 w-9 rounded-full lg:hidden' />
                                 <p className='text-xs font-medium text-[#00a884]'>{isSignup ? "Create your account" : "Welcome back"}</p>
                             </div>
-                            <h2 className='flex items-center justify-between text-[28px] font-light text-[#111b21]'>
+                            <h2 className='flex items-center justify-between text-[20px] font-light text-[#111b21]'>
                                 {currentState}
                                 {isDataSubmitted && (
                                     <button type="button" onClick={() => setIsDataSubmitted(false)} className='rounded-full border border-[#d1d7db] px-3 py-1 text-xs text-[#667781] transition hover:border-[#00a884] hover:text-[#111b21]'>
@@ -77,17 +77,17 @@ const LoginPage = () => {
 
                         {isSignup && !isDataSubmitted && (
                             <>
-                                <input onChange={(e) => setName(e.target.value)} value={name} type="text" className='wa-auth-input' placeholder='Full name' required />
-                                <div className='flex items-center gap-2 border-b-2 border-[#dfe5e7] py-1'>
+                                <input onChange={(e) => setName(e.target.value)} value={name} type="text" className='wa-auth-input text-sm' placeholder='Full name' required />
+                                <div className='flex items-center gap-2 border-b-2 border-[#dfe5e7] '>
                                     <FiPhone className='text-[#8696a0]' />
-                                    <input onChange={(e) => setPhone(e.target.value)} value={phone} type="tel" className='w-full bg-transparent py-2 text-[#111b21] outline-none placeholder:text-[#8696a0]' placeholder='Mobile number' required />
+                                    <input onChange={(e) => setPhone(e.target.value)} value={phone} type="tel" className='w-full bg-transparent py-2 text-[#111b21] outline-none placeholder:text-[#8696a0] text-sm' placeholder='Mobile number' required />
                                 </div>
                             </>
                         )}
                         {!isDataSubmitted && (
                             <>
-                                <input onChange={(e) => setEmail(e.target.value)} value={email} type="email" placeholder='Email address' required className='wa-auth-input' />
-                                <input onChange={(e) => setPassword(e.target.value)} value={password} type="password" placeholder='Password' required className='wa-auth-input' />
+                                <input onChange={(e) => setEmail(e.target.value)} value={email} type="email" placeholder='Email address' required className='wa-auth-input text-sm' />
+                                <input onChange={(e) => setPassword(e.target.value)} value={password} type="password" placeholder='Password' required className='wa-auth-input text-sm' />
                             </>
                         )}
                         {isSignup && isDataSubmitted && (
