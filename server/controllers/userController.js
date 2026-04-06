@@ -11,7 +11,7 @@ const normalizePhone = (value = "") => value.toString().replace(/[^\d+]/g, "").s
 export const signup = async (req, res) => {
     const { name, email, password, bio, phone } = req.body;
     try {
-        if (!name || !email || !password || !bio) {
+        if (!name || !email || !password || !bio || !phone) {
             return res.status(400).json({ success: false, message: "Missing details" })
         }
 

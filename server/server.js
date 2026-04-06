@@ -21,6 +21,11 @@ export const io = new Server(server, {
 
 //store online users
 export const userSocketMap = {}; //{userId: [socketId1, socketId2]}
+const getUserRoom = (userId) => `user:${userId}`;
+const emitToUser = (targetUserId, eventName, payload) => {
+    if (!targetUserId) return;
+    io.to(getUserRoom(targetUserId.toString())).emit(eventName, payload);
+};
 
 //Socket.io connection handler
 
@@ -34,6 +39,7 @@ io.on("connection", (socket) => {
             userSocketMap[userId] = [];
         }
         userSocketMap[userId].push(socket.id);
+        socket.join(getUserRoom(userId));
         User.findByIdAndUpdate(userId, { lastSeen: new Date() }).catch((error) => {
             console.log("Error updating active user status", error.message);
         });
@@ -43,64 +49,39 @@ io.on("connection", (socket) => {
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
     socket.on("call:offer", ({ to, offer, callType = "audio", caller }) => {
-        const receiverSocketIds = userSocketMap[to?.toString()];
-        if (receiverSocketIds && Array.isArray(receiverSocketIds)) {
-            receiverSocketIds.forEach((socketId) => {
-                io.to(socketId).emit("call:incoming", {
-                    from: userId,
-                    offer,
-                    callType,
-                    caller,
-                });
-            });
-        }
+        emitToUser(to, "call:incoming", {
+            from: userId,
+            offer,
+            callType,
+            caller,
+        });
     });
 
     socket.on("call:answer", ({ to, answer }) => {
-        const receiverSocketIds = userSocketMap[to?.toString()];
-        if (receiverSocketIds && Array.isArray(receiverSocketIds)) {
-            receiverSocketIds.forEach((socketId) => {
-                io.to(socketId).emit("call:answered", {
-                    from: userId,
-                    answer,
-                });
-            });
-        }
+        emitToUser(to, "call:answered", {
+            from: userId,
+            answer,
+        });
     });
 
     socket.on("call:ice-candidate", ({ to, candidate }) => {
-        const receiverSocketIds = userSocketMap[to?.toString()];
-        if (receiverSocketIds && Array.isArray(receiverSocketIds)) {
-            receiverSocketIds.forEach((socketId) => {
-                io.to(socketId).emit("call:ice-candidate", {
-                    from: userId,
-                    candidate,
-                });
-            });
-        }
+        emitToUser(to, "call:ice-candidate", {
+            from: userId,
+            candidate,
+        });
     });
 
     socket.on("call:reject", ({ to, reason = "rejected" }) => {
-        const receiverSocketIds = userSocketMap[to?.toString()];
-        if (receiverSocketIds && Array.isArray(receiverSocketIds)) {
-            receiverSocketIds.forEach((socketId) => {
-                io.to(socketId).emit("call:rejected", {
-                    from: userId,
-                    reason,
-                });
-            });
-        }
+        emitToUser(to, "call:rejected", {
+            from: userId,
+            reason,
+        });
     });
 
     socket.on("call:end", ({ to }) => {
-        const receiverSocketIds = userSocketMap[to?.toString()];
-        if (receiverSocketIds && Array.isArray(receiverSocketIds)) {
-            receiverSocketIds.forEach((socketId) => {
-                io.to(socketId).emit("call:ended", {
-                    from: userId,
-                });
-            });
-        }
+        emitToUser(to, "call:ended", {
+            from: userId,
+        });
     });
 
     socket.on("disconnect", () => {

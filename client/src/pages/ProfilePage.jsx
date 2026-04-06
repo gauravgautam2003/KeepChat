@@ -1,4 +1,5 @@
 import { useContext, useState } from 'react'
+import { FiPhone } from 'react-icons/fi'
 import {useNavigate } from 'react-router-dom'
 import assets from '../assets/assets'
 import { AuthContext } from '../../context/AuthContext'
@@ -12,11 +13,12 @@ const ProfilePage = () => {
     const [selectedImage, setSelectedImage] = useState(null)
     const [name, setName] = useState(authUser.name)
     const [bio,setBio] = useState(authUser.bio)
+    const [phone, setPhone] = useState(authUser.phone || "")
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if(!selectedImage){
-            await updateProfile({name, bio});
+            await updateProfile({name, bio, phone});
             navigate('/')
             return;
         }
@@ -25,7 +27,7 @@ const ProfilePage = () => {
         reader.readAsDataURL(selectedImage);
         reader.onload = async () => {
             const base64Image = reader.result;
-            await updateProfile({profilePic: base64Image,  name, bio});
+            await updateProfile({profilePic: base64Image, name, bio, phone});
             navigate("/");
         }
     }
@@ -48,6 +50,10 @@ const ProfilePage = () => {
                         <span className='text-xs text-[#667781]'>Upload profile image</span>
                     </label>
                     <input onChange={(e) => setName(e.target.value)} value={name} type="text" required placeholder='Your name' className='wa-auth-input' />
+                    <div className='flex items-center gap-2 border-b-2 border-[#dfe5e7] py-1'>
+                        <FiPhone className='text-[#8696a0]' />
+                        <input onChange={(e) => setPhone(e.target.value)} value={phone} type="tel" placeholder='Your mobile number' className='w-full bg-transparent py-2 text-[#111b21] outline-none placeholder:text-[#8696a0]' />
+                    </div>
                     <textarea onChange={(e) => setBio(e.target.value)} value={bio} placeholder='Write profile bio' rows={4} className='wa-auth-input resize-none'></textarea>
                     <div className='flex gap-3'>
                         <button type='submit' className='rounded-[10px] bg-[#00a884] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#00926f]'>Save Changes</button>
@@ -58,6 +64,7 @@ const ProfilePage = () => {
                     <img src={selectedImage ? URL.createObjectURL(selectedImage) : authUser?.profilePic || assets.avatar_icon} alt="" className='h-32 w-32 rounded-full border-4 border-white object-cover shadow-lg' />
                     <div className='space-y-1.5 text-center'>
                         <h4 className='text-lg font-semibold text-[#111b21]'>{name}</h4>
+                        <p className='text-xs text-[#00a884]'>{phone || "Add a mobile number"}</p>
                         <p className='max-w-xs text-xs text-[#667781]'>{bio || "Add a status so people know what you're up to."}</p>
                     </div>
                 </div>

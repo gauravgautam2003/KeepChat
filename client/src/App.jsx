@@ -15,7 +15,7 @@ const App = () => {
                 <div className="flex items-center gap-3 rounded-[12px] border border-[#d1d7db] bg-white px-5 py-4 shadow-[0_4px_14px_rgba(11,20,26,0.08)]">
                     <img src="/favicon.svg" alt="QuickChat" className="h-10 w-10 rounded-full" />
                     <div>
-                        <p className="text-sm font-semibold text-[#111b21]">QuickChat</p>
+                        <p className="text-sm font-semibold text-[#111b21]">KeepChat</p>
                         <p className="text-xs text-[#667781]">Loading your chats...</p>
                     </div>
                 </div>

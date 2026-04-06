@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react'
-import assets from '../assets/assets'
+import { FiPhone } from 'react-icons/fi'
 import { AuthContext } from '../../context/AuthContext'
 
 
@@ -9,11 +9,12 @@ const LoginPage = () => {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [bio, setBio] = useState("")
+    const [phone, setPhone] = useState("")
     const [isDataSubmitted, setIsDataSubmitted] = useState(false)
-    
 
 
-    const {login} = useContext(AuthContext);
+
+    const { login } = useContext(AuthContext);
     const isSignup = currentState === "Sign up";
 
 
@@ -25,10 +26,10 @@ const LoginPage = () => {
             return;
         }
 
-        login(currentState === "Sign up" ? "signup" : "login", {name, email, password, bio})
+        login(currentState === "Sign up" ? "signup" : "login", { name, email, password, bio, phone })
 
     }
-    
+
     return (
         <div className='screen-shell'>
             <div className='auth-card grid overflow-hidden border border-[#d1d7db] bg-[#f7f8fa] shadow-[0_8px_24px_rgba(11,20,26,0.12)] lg:grid-cols-[minmax(0,1.12fr)_minmax(420px,0.88fr)] lg:rounded-[14px]'>
@@ -37,23 +38,23 @@ const LoginPage = () => {
                         <div className='flex items-center gap-3'>
                             <img src="/favicon.svg" alt="QuickChat" className='h-10 w-10 rounded-full' />
                             <div>
-                                <p className='text-base font-semibold text-[#111b21]'>QuickChat</p>
-                                <p className='text-xs text-[#667781]'>Use QuickChat on your browser</p>
-                                </div>
+                                <p className='text-base font-semibold text-[#111b21]'>KeepChat</p>
+                                <p className='text-xs text-[#667781]'>Use KeepChat on your browser</p>
                             </div>
+                        </div>
                         <div className='space-y-4'>
-                            <h1 className='max-w-lg text-4xl font-light leading-tight text-[#111b21]'>Simple. Secure. Ready to chat.</h1>
+                            <h1 className='max-w-lg text-3xl font-light leading-tight text-[#111b21]'>Simple. Secure. Ready to chat.</h1>
                             <p className='max-w-xl text-sm leading-6 text-[#41525d]'>
-                                WhatsApp Web ki tarah clean sign in aur sign up flow, taaki user direct conversations me ja sake.
+                                Clean sign in and sign up flow like WhatsApp Web, so that users can go directly to conversations.
                             </p>
                         </div>
                         <div className='space-y-2 rounded-[12px] border border-[#d1d7db] bg-white p-4 text-xs text-[#41525d]'>
-                            <p>1. Sign in ya sign up karo</p>
-                            <p>2. Dusra user site khole to `Active now` show hoga</p>
-                            <p>3. Chat real-time sync ke saath ready rahegi</p>
+                            <p>1. Sign in or sign up</p>
+                            <p>2. If the other user opens the site, `Active now` will show</p>
+                            <p>3. Chat will be ready with real-time sync</p>
                         </div>
                     </div>
-                    <p className='text-xs text-[#667781]'>QuickChat works best when both users stay connected, just like WhatsApp Web.</p>
+                    <p className='text-xs text-[#667781]'>KeepChat works best when both users stay connected, just like WhatsApp Web.</p>
                 </div>
 
                 <div className='flex h-full items-center justify-center overflow-y-auto bg-[#f7f8fa] p-5 sm:p-8 lg:p-10'>
@@ -75,7 +76,13 @@ const LoginPage = () => {
                         </div>
 
                         {isSignup && !isDataSubmitted && (
-                            <input onChange={(e) => setName(e.target.value)} value={name} type="text" className='wa-auth-input' placeholder='Full name' required />
+                            <>
+                                <input onChange={(e) => setName(e.target.value)} value={name} type="text" className='wa-auth-input' placeholder='Full name' required />
+                                <div className='flex items-center gap-2 border-b-2 border-[#dfe5e7] py-1'>
+                                    <FiPhone className='text-[#8696a0]' />
+                                    <input onChange={(e) => setPhone(e.target.value)} value={phone} type="tel" className='w-full bg-transparent py-2 text-[#111b21] outline-none placeholder:text-[#8696a0]' placeholder='Mobile number' required />
+                                </div>
+                            </>
                         )}
                         {!isDataSubmitted && (
                             <>
