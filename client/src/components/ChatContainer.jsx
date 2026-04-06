@@ -605,13 +605,13 @@ const ChatContainer = () => {
                                     <p className='truncate text-sm font-medium'>{selectedUser.name}</p>
                                     <p className={`text-xs ${isSelectedUserOnline ? 'text-[#00a884]' : 'text-[#667781]'}`}>{isSelectedUserOnline ? '🟢 Active now' : formatLastSeen(selectedUser.lastSeen)}</p>
                                 </div>
-                                <button type="button" onClick={() => startCall("audio")} disabled={!isSelectedUserOnline} className='rounded-full p-2 text-[#54656f] transition hover:bg-[#e9edef] disabled:cursor-not-allowed disabled:opacity-45' title='Voice call' aria-label='Start voice call'>
+                                <button type="button" onClick={() => startCall("audio")} disabled={!isSelectedUserOnline} className='rounded-full  text-[#54656f] transition hover:bg-[#e9edef] disabled:cursor-not-allowed disabled:opacity-45' title='Voice call' aria-label='Start voice call'>
                                     <FiPhone className='text-lg' />
                                 </button>
-                                <button type="button" onClick={() => startCall("video")} disabled={!isSelectedUserOnline} className='rounded-full p-2 text-[#54656f] transition hover:bg-[#e9edef] disabled:cursor-not-allowed disabled:opacity-45' title='Video call' aria-label='Start video call'>
+                                <button type="button" onClick={() => startCall("video")} disabled={!isSelectedUserOnline} className='rounded-full  text-[#54656f] transition hover:bg-[#e9edef] disabled:cursor-not-allowed disabled:opacity-45' title='Video call' aria-label='Start video call'>
                                     <FiVideo className='text-lg' />
                                 </button>
-                                <button type="button" onClick={() => setIsSelectionMode(true)} className='rounded-full p-2 text-[#54656f] transition hover:bg-[#e9edef]' title='Select messages' aria-label='Select messages'>
+                                <button type="button" onClick={() => setIsSelectionMode(true)} className='rounded-full text-[#54656f] transition hover:bg-[#e9edef]' title='Select messages' aria-label='Select messages'>
                                     <FiCheckCircle className='text-lg' />
                                 </button>
                             </>
