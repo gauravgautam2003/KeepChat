@@ -6,7 +6,7 @@ import { Server } from 'socket.io'
 import userRouter from './routes/userRoutes.js';
 import messageRouter from './routes/messageRoutes.js';
 import dotenv from 'dotenv'
-dotenv.config({quiet: true});
+dotenv.config({ quiet: true });
 
 import User from './models/user.js';
 import dns from 'dns';
@@ -108,7 +108,9 @@ io.on("connection", (socket) => {
 })
 // middleware setup here
 app.use(cors({
-    origin: process.env.CLIENT_URL || "https://keep-chat.vercel.app"
+    origin: process.env.CLIENT_URL || "https://keep-chat.vercel.app",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
 }));
 app.use(express.json({ limit: "25mb" }))
 app.use(express.urlencoded({ limit: "25mb", extended: true }))
