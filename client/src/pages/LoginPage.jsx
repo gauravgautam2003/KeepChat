@@ -1,6 +1,7 @@
 import { useContext, useState } from 'react'
 import { FiPhone } from 'react-icons/fi'
 import { AuthContext } from '../context/AuthContext'
+import toast from 'react-hot-toast'
 
 
 const LoginPage = () => {
@@ -11,6 +12,8 @@ const LoginPage = () => {
     const [bio, setBio] = useState("")
     const [phone, setPhone] = useState("")
     const [isDataSubmitted, setIsDataSubmitted] = useState(false)
+
+    const normalizePhone = (value = "") => value.toString().replace(/[^\d+]/g, "").slice(0, 15);
 
 
 
@@ -26,8 +29,26 @@ const LoginPage = () => {
             return;
         }
 
-        login(currentState === "Sign up" ? "signup" : "login", { name, email, password, bio, phone })
+        if (isSignup) {
+            // Validate signup data
+            if (!name.trim() || !email.trim() || !password.trim() || !bio.trim() || !phone.trim()) {
+                toast.error("All fields are required");
+                return;
+            }
+            const normalizedPhone = normalizePhone(phone);
+            if (normalizedPhone.length < 10) {
+                toast.error("Enter a valid mobile number (at least 10 digits)");
+                return;
+            }
+        } else {
+            // Validate login data
+            if (!email.trim() || !password.trim()) {
+                toast.error("Email and password are required");
+                return;
+            }
+        }
 
+        login(currentState === "Sign up" ? "signup" : "login", { name, email, password, bio, phone })
     }
 
     return (
