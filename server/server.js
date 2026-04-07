@@ -108,7 +108,7 @@ io.on("connection", (socket) => {
 })
 // middleware setup here
 app.use(cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173"
+    origin: process.env.CLIENT_URL || "https://keep-chat.vercel.app"
 }));
 app.use(express.json({ limit: "25mb" }))
 app.use(express.urlencoded({ limit: "25mb", extended: true }))
