@@ -21,7 +21,7 @@ const PORT = process.env.PORT || 5000;
 
 //initialize socket.io
 export const io = new Server(server, {
-    cors: { origin: "*" }
+    cors: { origin: "https://keep-chat.vercel.app/" }
 })
 
 //store online users
