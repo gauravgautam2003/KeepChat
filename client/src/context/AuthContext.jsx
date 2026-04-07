@@ -10,6 +10,7 @@ export const AuthContext = createContext();
 
 const TOKEN_STORAGE_KEY = "token";
 const DEFAULT_REQUEST_MESSAGE = "Server is processing your request...";
+const BACKEND_HEARTBEAT_MS = 4 * 60 * 1000;
 
 const getStoredToken = () => localStorage.getItem(TOKEN_STORAGE_KEY) || sessionStorage.getItem(TOKEN_STORAGE_KEY);
 const getRequestStatusText = (config = {}) => {
@@ -35,6 +36,8 @@ export const AuthProvider = ({ children }) => {
     const [activeRequestCount, setActiveRequestCount] = useState(0);
     const [requestStatusText, setRequestStatusText] = useState(DEFAULT_REQUEST_MESSAGE);
     const socketRef = useRef(null);
+    const backendWakePromiseRef = useRef(null);
+    const lastBackendWakeRef = useRef(0);
 
     useEffect(() => {
         const releaseLoader = (config) => {
@@ -77,6 +80,36 @@ export const AuthProvider = ({ children }) => {
         };
     }, []);
 
+    const wakeBackend = useCallback(async ({ force = false, showLoader = false } = {}) => {
+        const now = Date.now();
+        if (!force && now - lastBackendWakeRef.current < 30000) {
+            return true;
+        }
+
+        if (backendWakePromiseRef.current) {
+            return backendWakePromiseRef.current;
+        }
+
+        backendWakePromiseRef.current = axios.get("/api/status", {
+            showLoader,
+            timeout: 65000,
+        }).then(() => {
+            lastBackendWakeRef.current = Date.now();
+            return true;
+        }).catch((error) => {
+            if (error.response) {
+                lastBackendWakeRef.current = Date.now();
+                return true;
+            }
+
+            throw error;
+        }).finally(() => {
+            backendWakePromiseRef.current = null;
+        });
+
+        return backendWakePromiseRef.current;
+    }, []);
+
     const connectSocket = useCallback((userData) => {
         if (!userData) return;
 
@@ -101,6 +134,7 @@ export const AuthProvider = ({ children }) => {
 
     const checkAuth = useCallback(async () => {
         try {
+            await wakeBackend({ showLoader: false });
             const { data } = await axios.get("/api/auth/check");
             if (data.success) {
                 setAuthUser(data.user);
@@ -112,10 +146,11 @@ export const AuthProvider = ({ children }) => {
         } finally {
             setIsAuthLoading(false);
         }
-    }, [connectSocket]);
+    }, [connectSocket, wakeBackend]);
 
     const login = async (state, credentials) => {
         try {
+            await wakeBackend({ force: true, showLoader: true });
             const { data } = await axios.post(`/api/auth/${state}`, credentials);
             if (data.success) {
                 setAuthUser(data.userData);
@@ -155,6 +190,7 @@ export const AuthProvider = ({ children }) => {
 
     const updateProfile = async (body) => {
         try {
+            await wakeBackend({ force: true, showLoader: true });
             const { data } = await axios.put("/api/auth/update-profile", body);
             if (data.success) {
                 setAuthUser(data.updatedUser);
@@ -182,6 +218,29 @@ export const AuthProvider = ({ children }) => {
         }
     }, [checkAuth, token]);
 
+    useEffect(() => {
+        wakeBackend({ force: true, showLoader: false }).catch(() => { });
+
+        const intervalId = setInterval(() => {
+            if (document.visibilityState === "visible") {
+                wakeBackend({ force: true, showLoader: false }).catch(() => { });
+            }
+        }, BACKEND_HEARTBEAT_MS);
+
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === "visible") {
+                wakeBackend({ force: true, showLoader: false }).catch(() => { });
+            }
+        };
+
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+
+        return () => {
+            clearInterval(intervalId);
+            document.removeEventListener("visibilitychange", handleVisibilityChange);
+        };
+    }, [wakeBackend]);
+
     useEffect(() => () => {
         socketRef.current?.off("getOnlineUsers");
         socketRef.current?.disconnect();
@@ -198,6 +257,7 @@ export const AuthProvider = ({ children }) => {
                 login,
                 logout,
                 updateProfile,
+                wakeBackend,
                 isRequestProcessing: activeRequestCount > 0,
                 requestStatusText,
             }}

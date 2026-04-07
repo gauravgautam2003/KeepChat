@@ -18,7 +18,7 @@ export const ChatProvider = ({ children }) => {
     const [selectedUser, setSelectedUserState] = useState(null);
     const [unseenMessages, setUnseenMessages] = useState({});
     const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
-    const { socket, axios, authUser, onlineUsers } = useContext(AuthContext);
+    const { socket, axios, authUser, onlineUsers, wakeBackend } = useContext(AuthContext);
     const selectedUserRef = useRef(null);
     const authUserRef = useRef(null);
 
@@ -36,8 +36,19 @@ export const ChatProvider = ({ children }) => {
         }
     }, []);
 
+    const ensureBackendAwake = useCallback(async ({ force = false, showLoader = false } = {}) => {
+        if (!wakeBackend) return true;
+        try {
+            await wakeBackend({ force, showLoader });
+            return true;
+        } catch {
+            return false;
+        }
+    }, [wakeBackend]);
+
     const getUsers = useCallback(async ({ showLoader = true } = {}) => {
         try {
+            await ensureBackendAwake({ showLoader });
             const { data } = await axios.get("/api/messages/users", { showLoader });
             if (data.success) {
                 setUsers(data.users);
@@ -46,10 +57,11 @@ export const ChatProvider = ({ children }) => {
         } catch (error) {
             toast.error(error.response?.data?.message || error.message);
         }
-    }, [axios]);
+    }, [axios, ensureBackendAwake]);
 
     const getMessages = useCallback(async (userId, { showLoader = true } = {}) => {
         try {
+            await ensureBackendAwake({ showLoader });
             const { data } = await axios.get(`/api/messages/${userId}`, { showLoader });
             if (data.success) {
                 setMessages(data.messages);
@@ -57,7 +69,7 @@ export const ChatProvider = ({ children }) => {
         } catch (error) {
             toast.error(error.response?.data?.message || error.message);
         }
-    }, [axios]);
+    }, [axios, ensureBackendAwake]);
 
     const sendMessage = useCallback(async (messageData) => {
         if (!selectedUser?._id || !authUser?._id) return;
@@ -81,6 +93,7 @@ export const ChatProvider = ({ children }) => {
         setMessages((prevMessages) => [...prevMessages, optimisticMessage]);
 
         try {
+            await ensureBackendAwake({ force: true, showLoader: false });
             const { data } = await axios.post(`/api/messages/send/${selectedUserId}`, {
                 ...messageData,
                 clientTempId,
@@ -108,7 +121,7 @@ export const ChatProvider = ({ children }) => {
             setMessages((prevMessages) => prevMessages.filter((message) => message.clientTempId !== clientTempId));
             toast.error(error.response?.data?.message || error.message);
         }
-    }, [authUser?._id, axios, selectedUser]);
+    }, [authUser?._id, axios, ensureBackendAwake, selectedUser]);
 
     const deleteMessage = useCallback(async (messageIds, mode = "everyone") => {
         const ids = Array.isArray(messageIds) ? messageIds : [messageIds];
@@ -135,6 +148,7 @@ export const ChatProvider = ({ children }) => {
             let data;
 
             try {
+                await ensureBackendAwake({ force: true, showLoader: false });
                 const response = await axios.post("/api/messages/delete", {
                     messageIds: normalizedIds,
                     mode,
@@ -149,6 +163,7 @@ export const ChatProvider = ({ children }) => {
                     throw error;
                 }
 
+                await ensureBackendAwake({ force: true, showLoader: false });
                 const fallbackResponse = await axios.delete(`/api/messages/${normalizedIds[0]}`, {
                     data: { mode },
                     showLoader: false,
@@ -166,7 +181,7 @@ export const ChatProvider = ({ children }) => {
                 getMessages(selectedUserRef.current._id, { showLoader: false });
             }
         }
-    }, [axios, getMessages, messages]);
+    }, [axios, ensureBackendAwake, getMessages, messages]);
 
     const subscribeToMessages = useCallback(() => {
         if (!socket || !authUser) return;

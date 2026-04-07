@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { FiPhone } from 'react-icons/fi'
 import {useNavigate } from 'react-router-dom'
 import assets from '../assets/assets'
@@ -14,6 +14,21 @@ const ProfilePage = () => {
     const [name, setName] = useState(authUser.name)
     const [bio,setBio] = useState(authUser.bio)
     const [phone, setPhone] = useState(authUser.phone || "")
+    const [previewImage, setPreviewImage] = useState(authUser?.profilePic || assets.avatar_icon)
+
+    useEffect(() => {
+        if (!selectedImage) {
+            setPreviewImage(authUser?.profilePic || assets.avatar_icon)
+            return undefined
+        }
+
+        const objectUrl = URL.createObjectURL(selectedImage)
+        setPreviewImage(objectUrl)
+
+        return () => {
+            URL.revokeObjectURL(objectUrl)
+        }
+    }, [authUser?.profilePic, selectedImage])
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -50,7 +65,7 @@ const ProfilePage = () => {
                     </div>
                     <label htmlFor="avatar" className='flex cursor-pointer items-center gap-3 rounded-[10px] border border-[#dfe5e7] bg-white px-3 py-2 '>
                         <input onChange={(e) => setSelectedImage(e.target.files[0])} type="file" id='avatar' accept='image/*' hidden />
-                        <img src={selectedImage ? URL.createObjectURL(selectedImage) : authUser?.profilePic || assets.avatar_icon} alt="" className='h-12 w-12 rounded-full object-cover'/>
+                        <img src={previewImage} alt="" className='h-12 w-12 rounded-full object-cover'/>
                         <span className='text-xs text-[#667781]'>Upload profile image...</span>
                     </label>
                     <input onChange={(e) => setName(e.target.value)} value={name} type="text" required placeholder='Your name' className='border-b-1 border-gray-300 py-1 px-3' />
@@ -65,7 +80,7 @@ const ProfilePage = () => {
                     </div>
                 </form>
                 <div className='flex h-full flex-col items-center justify-center gap-4 overflow-y-auto border-t border-[#dfe5e7] bg-[#e7f0e4] p-6 sm:p-8 lg:border-l lg:border-t-0'>
-                    <img src={selectedImage ? URL.createObjectURL(selectedImage) : authUser?.profilePic || assets.avatar_icon} alt="" className='h-32 w-32 rounded-full border-4 border-white object-cover shadow-lg' />
+                    <img src={previewImage} alt="" className='h-32 w-32 rounded-full border-4 border-white object-cover shadow-lg' />
                     <div className='space-y-1.5 text-center'>
                         <h4 className='text-md font-semibold text-[#111b21]'>{name}</h4>
                         <p className='text-xs text-[#00a884]'>{phone || "Add a mobile number"}</p>
