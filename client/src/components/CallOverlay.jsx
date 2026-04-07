@@ -93,7 +93,7 @@ const CallOverlay = ({
                 <button
                     type="button"
                     onClick={onEnd}
-                    className='absolute left-2 top-2 z-30 flex h-10 w-10 items-center justify-center  text-lg transition-all'
+                    className='absolute right-4 top-4 z-30 flex h-10 w-10 items-center justify-center  text-lg transition-all'
                     aria-label='Close call panel'
                 >
                     <FiX />
