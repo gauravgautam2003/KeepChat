@@ -7,7 +7,7 @@ import { AuthContext } from '../context/AuthContext'
 
 const ProfilePage = () => {
 
-    const {authUser, updateProfile} = useContext(AuthContext) 
+    const {authUser, updateProfile, isRequestProcessing} = useContext(AuthContext) 
     const navigate  = useNavigate()
 
     const [selectedImage, setSelectedImage] = useState(null)
@@ -56,7 +56,7 @@ const ProfilePage = () => {
                     </div>
                     <textarea onChange={(e) => setBio(e.target.value)} value={bio} placeholder='Write profile bio' rows={4} className='border-b-1 border-gray-300 resize-none p-1'></textarea>
                     <div className='flex gap-3'>
-                        <button type='submit' className='rounded-[10px] bg-[#00a884] px-5 py-2 text-sm font-medium text-white transition hover:bg-[#00926f]'>Save Changes</button>
+                        <button type='submit' disabled={isRequestProcessing} className='rounded-[10px] bg-[#00a884] px-5 py-2 text-sm font-medium text-white transition hover:bg-[#00926f] disabled:cursor-not-allowed disabled:opacity-70'>{isRequestProcessing ? "Saving..." : "Save Changes"}</button>
                         <button type='button' onClick={() => navigate('/')} className='rounded-[10px] border border-[#d1d7db] px-5 py-2 text-sm text-[#667781] transition hover:border-[#00a884] hover:text-[#111b21]'>Cancel</button>
                     </div>
                 </form>

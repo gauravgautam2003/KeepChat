@@ -18,10 +18,37 @@ dns.setServers(["8.8.4.4", "8.8.8.8"])
 const app = express()
 const server = http.createServer(app)// used for to allow socket.io functionality
 const PORT = process.env.PORT || 5000;
+const normalizeOrigin = (origin = "") => origin.replace(/\/$/, "");
+const configuredClientOrigins = (process.env.CLIENT_URL || "")
+    .split(",")
+    .map((origin) => normalizeOrigin(origin.trim()))
+    .filter(Boolean);
+const allowedOrigins = [...new Set([
+    "http://localhost:5173",
+    "https://keep-chat.vercel.app",
+    ...configuredClientOrigins,
+].map(normalizeOrigin))];
+const corsOptions = {
+    origin: (origin, callback) => {
+        if (!origin) {
+            return callback(null, true);
+        }
+
+        const normalizedOrigin = normalizeOrigin(origin);
+        if (allowedOrigins.includes(normalizedOrigin)) {
+            return callback(null, true);
+        }
+
+        return callback(new Error(`Origin ${origin} not allowed by CORS`));
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "token"],
+    credentials: true,
+};
 
 //initialize socket.io
 export const io = new Server(server, {
-    cors: { origin: "*" }
+    cors: corsOptions
 })
 
 //store online users
@@ -107,12 +134,11 @@ io.on("connection", (socket) => {
     })
 })
 // middleware setup here
-const clientOrigin = process.env.CLIENT_URL?.replace(/\/$/, "") || "https://keep-chat.vercel.app";
-app.use(cors({
-    origin: clientOrigin,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
-}));
+app.use(cors(corsOptions));
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.url} from ${req.headers.origin || 'no origin'}`);
+    next();
+});
 app.use(express.json({ limit: "25mb" }))
 app.use(express.urlencoded({ limit: "25mb", extended: true }))
 

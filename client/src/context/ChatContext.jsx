@@ -34,9 +34,9 @@ export const ChatProvider = ({ children }) => {
         }
     }, []);
 
-    const getUsers = useCallback(async () => {
+    const getUsers = useCallback(async ({ showLoader = true } = {}) => {
         try {
-            const { data } = await axios.get("/api/messages/users");
+            const { data } = await axios.get("/api/messages/users", { showLoader });
             if (data.success) {
                 setUsers(data.users);
                 setUnseenMessages(data.unseenMessages);
@@ -46,9 +46,9 @@ export const ChatProvider = ({ children }) => {
         }
     }, [axios]);
 
-    const getMessages = useCallback(async (userId) => {
+    const getMessages = useCallback(async (userId, { showLoader = true } = {}) => {
         try {
-            const { data } = await axios.get(`/api/messages/${userId}`);
+            const { data } = await axios.get(`/api/messages/${userId}`, { showLoader });
             if (data.success) {
                 setMessages(data.messages);
             }
@@ -82,6 +82,8 @@ export const ChatProvider = ({ children }) => {
             const { data } = await axios.post(`/api/messages/send/${selectedUserId}`, {
                 ...messageData,
                 clientTempId,
+            }, {
+                showLoader: false,
             });
             if (data.success) {
                 setMessages((prevMessages) =>
@@ -134,6 +136,8 @@ export const ChatProvider = ({ children }) => {
                 const response = await axios.post("/api/messages/delete", {
                     messageIds: normalizedIds,
                     mode,
+                }, {
+                    showLoader: false,
                 });
                 data = response.data;
             } catch (error) {
@@ -145,6 +149,7 @@ export const ChatProvider = ({ children }) => {
 
                 const fallbackResponse = await axios.delete(`/api/messages/${normalizedIds[0]}`, {
                     data: { mode },
+                    showLoader: false,
                 });
                 data = fallbackResponse.data;
             }
@@ -156,7 +161,7 @@ export const ChatProvider = ({ children }) => {
             setMessages(previousMessages);
             toast.error(error.response?.data?.message || error.message);
             if (selectedUserRef.current?._id) {
-                getMessages(selectedUserRef.current._id);
+                getMessages(selectedUserRef.current._id, { showLoader: false });
             }
         }
     }, [axios, getMessages, messages]);
@@ -195,7 +200,7 @@ export const ChatProvider = ({ children }) => {
 
                 if (isRelevantToCurrentChat) {
                     if (!isSentByMe) {
-                        axios.patch(`/api/messages/mark/${newMessage._id}`);
+                        axios.patch(`/api/messages/mark/${newMessage._id}`, {}, { showLoader: false });
                     }
                     return [...prevMessages, {
                         ...newMessage,
@@ -215,10 +220,10 @@ export const ChatProvider = ({ children }) => {
             }
 
             if (isRelevantToCurrentChat && selectedUserId) {
-                getMessages(selectedUserId);
+                getMessages(selectedUserId, { showLoader: false });
             }
 
-            getUsers();
+            getUsers({ showLoader: false });
         });
 
         socket.on("messageSeen", ({ messageId }) => {

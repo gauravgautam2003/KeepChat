@@ -14,6 +14,7 @@ const Sidebar = () => {
     const [input, setInput] = useState("")
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const menuRef = useRef(null)
+    const hasLoadedUsersRef = useRef(false)
 
 
     const navigate = useNavigate();
@@ -21,7 +22,9 @@ const Sidebar = () => {
     const filterUsers = input ? users.filter((user) => (user?.name || "").toLowerCase().includes(input.toLowerCase())) : users;
 
     useEffect(() => {
-        getUsers();
+        getUsers({ showLoader: !hasLoadedUsersRef.current }).finally(() => {
+            hasLoadedUsersRef.current = true
+        });
     },[getUsers, onlineUsers])
 
     useEffect(() => {

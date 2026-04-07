@@ -5,9 +5,10 @@ import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import ProfilePage from './pages/ProfilePage'
 import { AuthContext } from './context/AuthContext'
+import RequestLoader from './components/RequestLoader'
 
 const App = () => {
-    const { authUser, isAuthLoading } = useContext(AuthContext);
+    const { authUser, isAuthLoading, isRequestProcessing, requestStatusText } = useContext(AuthContext);
 
     if (isAuthLoading) {
         return (
@@ -35,6 +36,7 @@ const App = () => {
                     },
                 }}
             />
+            {isRequestProcessing && <RequestLoader message={requestStatusText} />}
             <Routes>
                 <Route path="/" element={authUser ? <HomePage /> : <Navigate to="/login" />} />
                 <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to="/" />} />

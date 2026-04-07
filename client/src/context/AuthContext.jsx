@@ -3,14 +3,28 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
 
-const backendUrl = import.meta.env.VITE_BACKEND_URL || "https://keep-chat.onrender.com";
+const backendUrl = (import.meta.env.VITE_BACKEND_URL || "https://keep-chat.onrender.com").replace(/\/$/, "");
 axios.defaults.baseURL = backendUrl;
 
 export const AuthContext = createContext();
 
 const TOKEN_STORAGE_KEY = "token";
+const DEFAULT_REQUEST_MESSAGE = "Server is processing your request...";
 
 const getStoredToken = () => sessionStorage.getItem(TOKEN_STORAGE_KEY) || localStorage.getItem(TOKEN_STORAGE_KEY);
+const getRequestStatusText = (config = {}) => {
+    const method = (config.method || "get").toLowerCase();
+    const url = (config.url || "").toLowerCase();
+
+    if (url.includes("/api/auth/check")) return "Checking your session...";
+    if (url.includes("/api/auth/login")) return "Logging you in...";
+    if (url.includes("/api/auth/signup")) return "Creating your account...";
+    if (url.includes("/api/auth/update-profile")) return "Saving your profile...";
+    if (url.includes("/api/messages/users")) return "Loading your chats...";
+    if (method === "get" && /\/api\/messages\/[^/]+$/.test(url)) return "Loading conversation...";
+
+    return DEFAULT_REQUEST_MESSAGE;
+};
 
 export const AuthProvider = ({ children }) => {
     const [token, setToken] = useState(getStoredToken);
@@ -18,7 +32,50 @@ export const AuthProvider = ({ children }) => {
     const [onlineUsers, setOnlineUsers] = useState([]);
     const [socket, setSocket] = useState(null);
     const [isAuthLoading, setIsAuthLoading] = useState(true);
+    const [activeRequestCount, setActiveRequestCount] = useState(0);
+    const [requestStatusText, setRequestStatusText] = useState(DEFAULT_REQUEST_MESSAGE);
     const socketRef = useRef(null);
+
+    useEffect(() => {
+        const releaseLoader = (config) => {
+            if (config?.metadata?.showLoader) {
+                setActiveRequestCount((count) => Math.max(0, count - 1));
+            }
+        };
+
+        const requestInterceptor = axios.interceptors.request.use(
+            (config) => {
+                if (config.showLoader === false) {
+                    return config;
+                }
+
+                config.metadata = {
+                    ...(config.metadata || {}),
+                    showLoader: true,
+                };
+                setRequestStatusText(getRequestStatusText(config));
+                setActiveRequestCount((count) => count + 1);
+                return config;
+            },
+            (error) => Promise.reject(error),
+        );
+
+        const responseInterceptor = axios.interceptors.response.use(
+            (response) => {
+                releaseLoader(response.config);
+                return response;
+            },
+            (error) => {
+                releaseLoader(error.config);
+                return Promise.reject(error);
+            },
+        );
+
+        return () => {
+            axios.interceptors.request.eject(requestInterceptor);
+            axios.interceptors.response.eject(responseInterceptor);
+        };
+    }, []);
 
     const connectSocket = useCallback((userData) => {
         if (!userData) return;
@@ -137,6 +194,8 @@ export const AuthProvider = ({ children }) => {
                 login,
                 logout,
                 updateProfile,
+                isRequestProcessing: activeRequestCount > 0,
+                requestStatusText,
             }}
         >
             {children}

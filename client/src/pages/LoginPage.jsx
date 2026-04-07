@@ -17,7 +17,7 @@ const LoginPage = () => {
 
 
 
-    const { login } = useContext(AuthContext);
+    const { login, isRequestProcessing } = useContext(AuthContext);
     const isSignup = currentState === "Sign up";
 
 
@@ -115,8 +115,8 @@ const LoginPage = () => {
                             <textarea onChange={(e) => setBio(e.target.value)} value={bio} rows={4} className='wa-auth-input resize-none' placeholder='Write a short about line' required />
                         )}
 
-                        <button type='submit' className='w-full rounded-[10px] bg-[#00a884] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#00926f]'>
-                            {isSignup ? (isDataSubmitted ? "Create Account" : "Continue") : "Login Now"}
+                        <button type='submit' disabled={isRequestProcessing} className='w-full rounded-[10px] bg-[#00a884] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#00926f] disabled:cursor-not-allowed disabled:opacity-70'>
+                            {isRequestProcessing ? "Please wait..." : isSignup ? (isDataSubmitted ? "Create Account" : "Continue") : "Login Now"}
                         </button>
 
                         <label className='flex items-start gap-3 rounded-[10px] border border-[#dfe5e7] bg-[#f7f8fa] p-3 text-xs text-[#667781]'>

@@ -1,5 +1,4 @@
 import { FiMic, FiMicOff, FiPhoneIncoming, FiPhoneOff, FiVideo, FiVideoOff, FiX } from 'react-icons/fi'
-import { useState, useEffect } from 'react'
 import assets from '../assets/assets'
 import { formatPhoneNumber } from '../lib/utils'
 
