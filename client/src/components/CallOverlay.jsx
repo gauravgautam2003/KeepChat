@@ -41,8 +41,8 @@ const CallOverlay = ({
 
     if (isIncoming) {
         return (
-            <div className='fixed inset-0 z-[120] flex items-center justify-center bg-[#0b141a]/42 backdrop-blur-[2px]'>
-                <div className='mx-4 h-auto w-full max-w-[420px] rounded-2xl border border-white/10 bg-[#111b21] p-5 text-white shadow-[0_30px_80px_rgba(0,0,0,0.45)] sm:p-6'>
+            <div className='fixed inset-0 z-[120] flex min-h-[100dvh] items-center justify-center overflow-y-auto bg-[#0b141a]/42 px-4 py-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-[2px]'>
+                <div className='my-auto h-auto w-full max-w-[420px] rounded-2xl border border-white/10 bg-[#111b21] p-5 text-white shadow-[0_30px_80px_rgba(0,0,0,0.45)] sm:p-6'>
                     <div className='space-y-5 text-center'>
                         <div className='mx-auto inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] uppercase tracking-[0.24em] text-[#9fb3c8]'>
                             KeepChat
@@ -87,12 +87,12 @@ const CallOverlay = ({
     }
 
     return (
-        <div className='fixed inset-0 z-[120] flex items-center justify-center bg-[#0b141a]/58 backdrop-blur-sm'>
-            <div className='relative flex h-screen w-screen flex-col overflow-hidden border border-white/10 bg-[#111b21] text-white shadow-[0_30px_90px_rgba(0,0,0,0.46)]'>
+        <div className='fixed inset-0 z-[120] flex min-h-[100dvh] items-center justify-center overflow-hidden bg-[#0b141a]/58 backdrop-blur-sm'>
+            <div className='relative flex h-[100dvh] w-full flex-col overflow-hidden border border-white/10 bg-[#111b21] text-white shadow-[0_30px_90px_rgba(0,0,0,0.46)]'>
                 <button
                     type="button"
                     onClick={onEnd}
-                    className='absolute right-3 top-3 z-30 flex h-10 w-10 items-center justify-center rounded-full bg-[#111b21]/70 text-lg transition-all hover:bg-[#1a262d] sm:right-4 sm:top-4'
+                    className='absolute right-3 top-[max(0.75rem,env(safe-area-inset-top))] z-30 flex h-10 w-10 items-center justify-center rounded-full bg-[#111b21]/70 text-lg transition-all hover:bg-[#1a262d] sm:right-4'
                     aria-label='Close call panel'
                 >
                     <FiX />
@@ -133,7 +133,7 @@ const CallOverlay = ({
                         </div>
                     </div>
 
-                    <div className='relative flex min-h-0 flex-1 flex-col bg-[#0b141a] p-3 sm:p-5 lg:p-8'>
+                    <div className='relative flex min-h-0 flex-1 flex-col bg-[#0b141a] p-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] sm:p-5 sm:pb-[calc(env(safe-area-inset-bottom)+1rem)] lg:p-8'>
                         <div className='relative flex-1 overflow-hidden rounded-2xl border border-white/10 bg-[#1f2c34]'>
                             {isVideoCall ? (
                                 <>

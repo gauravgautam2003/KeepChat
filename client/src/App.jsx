@@ -12,7 +12,7 @@ const App = () => {
 
     if (isAuthLoading) {
         return (
-            <div className="app-shell flex min-h-screen items-center justify-center bg-[#f0f2f5]">
+            <div className="app-shell flex min-h-[100dvh] items-center justify-center bg-[#f0f2f5]">
                 <div className="flex items-center gap-3 rounded-[12px] border border-[#d1d7db] bg-white px-5 py-4 shadow-[0_4px_14px_rgba(11,20,26,0.08)]">
                     <img src="/favicon.svg" alt="QuickChat" className="h-10 w-10 rounded-full" />
                     <div>
@@ -25,7 +25,7 @@ const App = () => {
     }
 
     return (
-        <div className="app-shell min-h-screen">
+        <div className="app-shell min-h-[100dvh]">
             <Toaster
                 position="top-center"
                 toastOptions={{

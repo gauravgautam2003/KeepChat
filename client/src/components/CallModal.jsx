@@ -41,8 +41,8 @@ const CallModal = ({
 
     if (isIncoming) {
         return (
-            <div className='fixed inset-0 z-[120] flex items-center justify-center bg-[#0b141a]/42 backdrop-blur-[2px]'>
-                <div className='h-screen w-screen rounded-sm border border-white/10 bg-[#111b21] p-2 text-white shadow-[0_30px_80px_rgba(0,0,0,0.45)]'>
+            <div className='fixed inset-0 z-[120] flex min-h-[100dvh] items-center justify-center overflow-y-auto bg-[#0b141a]/42 px-4 py-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-[2px]'>
+                <div className='my-auto h-auto w-full max-w-[420px] rounded-2xl border border-white/10 bg-[#111b21] p-5 text-white shadow-[0_30px_80px_rgba(0,0,0,0.45)] sm:p-6'>
                     <div className='space-y-5 text-center'>
                         <div className='mx-auto inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] uppercase tracking-[0.24em] text-[#9fb3c8]'>
                             KeepChat
@@ -87,12 +87,12 @@ const CallModal = ({
     }
 
     return (
-        <div className='fixed inset-0 z-[120] flex items-center justify-center bg-[#0b141a]/58 backdrop-blur-sm'>
-            <div className='relative flex h-screen w-screen flex-col overflow-hidden  border border-white/10 bg-[#111b21] text-white shadow-[0_30px_90px_rgba(0,0,0,0.46)]'>
+        <div className='fixed inset-0 z-[120] flex min-h-[100dvh] items-center justify-center overflow-hidden bg-[#0b141a]/58 backdrop-blur-sm'>
+            <div className='relative flex h-[100dvh] w-full flex-col overflow-hidden border border-white/10 bg-[#111b21] text-white shadow-[0_30px_90px_rgba(0,0,0,0.46)]'>
                 <button
                     type="button"
                     onClick={onEnd}
-                    className='absolute left-2 top-2 z-30 flex h-10 w-10 items-center justify-center  text-lg transition-all'
+                    className='absolute left-3 top-[max(0.75rem,env(safe-area-inset-top))] z-30 flex h-10 w-10 items-center justify-center rounded-full bg-[#111b21]/70 text-lg transition-all hover:bg-[#1a262d] sm:left-4'
                     aria-label='Close call panel'
                 >
                     <FiX />
@@ -133,8 +133,8 @@ const CallModal = ({
                         </div>
                     </div>
 
-                    <div className='relative flex min-h-0 flex-1 flex-col bg-[#0b141a] p-4 sm:p-6 lg:p-8'>
-                        <div className='relative flex-1 overflow-hidden rounded-lg border border-white/10 bg-[#1f2c34]'>
+                    <div className='relative flex min-h-0 flex-1 flex-col bg-[#0b141a] p-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] sm:p-5 sm:pb-[calc(env(safe-area-inset-bottom)+1rem)] lg:p-8'>
+                        <div className='relative flex-1 overflow-hidden rounded-2xl border border-white/10 bg-[#1f2c34]'>
                             {isVideoCall ? (
                                 <>
                                     <video
@@ -164,7 +164,7 @@ const CallModal = ({
                                 </div>
                             )}
 
-                            <div className='absolute bottom-4 right-4 h-32 w-24 overflow-hidden rounded-lg border border-white/10 bg-[#202c33] shadow-lg sm:h-40 sm:w-28'>
+                            <div className='absolute bottom-3 right-3 h-28 w-[5.5rem] overflow-hidden rounded-xl border border-white/10 bg-[#202c33] shadow-lg sm:bottom-4 sm:right-4 sm:h-36 sm:w-[6.5rem] md:h-40 md:w-28'>
                                 {isVideoCall && !isCameraOff ? (
                                     <video ref={localVideoRef} autoPlay playsInline muted className='h-full w-full object-cover' />
                                 ) : (
@@ -176,7 +176,7 @@ const CallModal = ({
                             </div>
                         </div>
 
-                        <div className='mt-5 flex flex-wrap items-center justify-center gap-3'>
+                        <div className='mt-4 flex flex-wrap items-center justify-center gap-3 sm:mt-5'>
                             <button
                                 type="button"
                                 onClick={onToggleMic}

@@ -11,7 +11,7 @@ export const AuthContext = createContext();
 const TOKEN_STORAGE_KEY = "token";
 const DEFAULT_REQUEST_MESSAGE = "Server is processing your request...";
 
-const getStoredToken = () => sessionStorage.getItem(TOKEN_STORAGE_KEY) || localStorage.getItem(TOKEN_STORAGE_KEY);
+const getStoredToken = () => localStorage.getItem(TOKEN_STORAGE_KEY) || sessionStorage.getItem(TOKEN_STORAGE_KEY);
 const getRequestStatusText = (config = {}) => {
     const method = (config.method || "get").toLowerCase();
     const url = (config.url || "").toLowerCase();
@@ -123,8 +123,8 @@ export const AuthProvider = ({ children }) => {
                 axios.defaults.headers.common.token = data.token;
                 axios.defaults.headers.common.Authorization = `Bearer ${data.token}`;
                 setToken(data.token);
-                sessionStorage.setItem(TOKEN_STORAGE_KEY, data.token);
-                localStorage.removeItem(TOKEN_STORAGE_KEY);
+                localStorage.setItem(TOKEN_STORAGE_KEY, data.token);
+                sessionStorage.removeItem(TOKEN_STORAGE_KEY);
                 toast.success(data.message);
                 setIsAuthLoading(false);
             } else {
@@ -171,8 +171,8 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         if (token) {
-            sessionStorage.setItem(TOKEN_STORAGE_KEY, token);
-            localStorage.removeItem(TOKEN_STORAGE_KEY);
+            localStorage.setItem(TOKEN_STORAGE_KEY, token);
+            sessionStorage.removeItem(TOKEN_STORAGE_KEY);
             axios.defaults.headers.common.token = token;
             axios.defaults.headers.common.Authorization = `Bearer ${token}`;
             setIsAuthLoading(true);
