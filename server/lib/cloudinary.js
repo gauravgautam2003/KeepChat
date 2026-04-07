@@ -40,7 +40,7 @@ const uploadOnCloudinary = async (filePath) => {
              // ignore unlink errors
          }
          console.error("Cloudinary Error:", error);
-         return filePath.startsWith("data:") ? filePath : null;
+         return null;
     }
 }
 export default uploadOnCloudinary

@@ -42,7 +42,7 @@ const CallOverlay = ({
     if (isIncoming) {
         return (
             <div className='fixed inset-0 z-[120] flex items-center justify-center bg-[#0b141a]/42 backdrop-blur-[2px]'>
-                <div className='h-auto w-[420px] rounded-xl  border border-white/10 bg-[#111b21] p-6 text-white shadow-[0_30px_80px_rgba(0,0,0,0.45)]'>
+                <div className='mx-4 h-auto w-full max-w-[420px] rounded-2xl border border-white/10 bg-[#111b21] p-5 text-white shadow-[0_30px_80px_rgba(0,0,0,0.45)] sm:p-6'>
                     <div className='space-y-5 text-center'>
                         <div className='mx-auto inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] uppercase tracking-[0.24em] text-[#9fb3c8]'>
                             KeepChat
@@ -88,18 +88,18 @@ const CallOverlay = ({
 
     return (
         <div className='fixed inset-0 z-[120] flex items-center justify-center bg-[#0b141a]/58 backdrop-blur-sm'>
-            <div className='relative flex h-screen w-screen flex-col overflow-hidden  border border-white/10 bg-[#111b21] text-white shadow-[0_30px_90px_rgba(0,0,0,0.46)]'>
+            <div className='relative flex h-screen w-screen flex-col overflow-hidden border border-white/10 bg-[#111b21] text-white shadow-[0_30px_90px_rgba(0,0,0,0.46)]'>
                 <button
                     type="button"
                     onClick={onEnd}
-                    className='absolute right-4 top-4 z-30 flex h-10 w-10 items-center justify-center  text-lg transition-all'
+                    className='absolute right-3 top-3 z-30 flex h-10 w-10 items-center justify-center rounded-full bg-[#111b21]/70 text-lg transition-all hover:bg-[#1a262d] sm:right-4 sm:top-4'
                     aria-label='Close call panel'
                 >
                     <FiX />
                 </button>
 
-                <div className='grid flex-1 min-h-0 '>
-                    {/* <div className='flex flex-col justify-between gap-6 border-white/10 bg-[radial-gradient(circle_at_top,_rgba(37,211,102,0.18),_transparent_45%),linear-gradient(180deg,_rgba(255,255,255,0.06),_rgba(255,255,255,0.02))] p-6 sm:p-8 lg:border-b-0 lg:border-r'>
+                <div className='grid flex-1 min-h-0 lg:grid-cols-[minmax(280px,320px)_minmax(0,1fr)]'>
+                    <div className='hidden flex-col justify-between gap-6 border-white/10 bg-[radial-gradient(circle_at_top,_rgba(37,211,102,0.18),_transparent_45%),linear-gradient(180deg,_rgba(255,255,255,0.06),_rgba(255,255,255,0.02))] p-6 lg:flex lg:border-r xl:p-8'>
                         <div className='space-y-4'>
                             <div className='inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-[#9fb3c8]'>
                                 KeepChat Call
@@ -131,10 +131,10 @@ const CallOverlay = ({
                                 <p className='mt-2 text-xs font-medium'>{session.hasRemoteStream ? "Connected" : "Waiting for other side"}</p>
                             </div>
                         </div>
-                    </div> */}
+                    </div>
 
-                    <div className='relative flex min-h-0 flex-1 flex-col bg-[#0b141a] p-4 sm:p-6 lg:p-8'>
-                        <div className='relative flex-1 overflow-hidden rounded-lg border border-white/10 bg-[#1f2c34]'>
+                    <div className='relative flex min-h-0 flex-1 flex-col bg-[#0b141a] p-3 sm:p-5 lg:p-8'>
+                        <div className='relative flex-1 overflow-hidden rounded-2xl border border-white/10 bg-[#1f2c34]'>
                             {isVideoCall ? (
                                 <>
                                     <video
@@ -164,7 +164,7 @@ const CallOverlay = ({
                                 </div>
                             )}
 
-                            <div className='absolute bottom-4 right-4 h-32 w-24 overflow-hidden rounded-lg border border-white/10 bg-[#202c33] shadow-lg sm:h-40 sm:w-28'>
+                            <div className='absolute bottom-3 right-3 h-28 w-[5.5rem] overflow-hidden rounded-xl border border-white/10 bg-[#202c33] shadow-lg sm:bottom-4 sm:right-4 sm:h-36 sm:w-[6.5rem] md:h-40 md:w-28'>
                                 {isVideoCall && !isCameraOff ? (
                                     <video ref={localVideoRef} autoPlay playsInline muted className='h-full w-full object-cover' />
                                 ) : (
@@ -176,7 +176,7 @@ const CallOverlay = ({
                             </div>
                         </div>
 
-                        <div className='mt-5 flex flex-wrap items-center justify-center gap-3'>
+                        <div className='mt-4 flex flex-wrap items-center justify-center gap-3 sm:mt-5'>
                             <button
                                 type="button"
                                 onClick={onToggleMic}

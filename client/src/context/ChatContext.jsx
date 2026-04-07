@@ -17,12 +17,14 @@ export const ChatProvider = ({ children }) => {
     const [users, setUsers] = useState([]);
     const [selectedUser, setSelectedUserState] = useState(null);
     const [unseenMessages, setUnseenMessages] = useState({});
+    const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
     const { socket, axios, authUser, onlineUsers } = useContext(AuthContext);
     const selectedUserRef = useRef(null);
     const authUserRef = useRef(null);
 
     const setSelectedUser = useCallback((user) => {
         setSelectedUserState(user);
+        setIsRightSidebarOpen(false);
 
         if (user?._id) {
             sessionStorage.setItem(SELECTED_CHAT_STORAGE_KEY, user._id);
@@ -314,6 +316,8 @@ export const ChatProvider = ({ children }) => {
                 setSelectedUser,
                 unseenMessages,
                 setUnseenMessages,
+                isRightSidebarOpen,
+                setIsRightSidebarOpen,
             }}
         >
             {children}

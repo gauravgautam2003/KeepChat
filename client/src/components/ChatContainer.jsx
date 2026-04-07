@@ -3,7 +3,7 @@
 import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import { BsCheck2, BsCheck2All } from 'react-icons/bs'
-import { FiArrowLeft, FiCheck, FiCheckCircle, FiCircle, FiImage, FiMoreVertical, FiPhone, FiSend, FiTrash2, FiVideo } from 'react-icons/fi'
+import { FiArrowLeft, FiCheck, FiCheckCircle, FiCircle, FiImage, FiInfo, FiMoreVertical, FiPhone, FiSend, FiTrash2, FiVideo } from 'react-icons/fi'
 import assets from '../assets/assets'
 import CallOverlay from './CallOverlay'
 import { formatLastSeen, formatMessageTime } from '../lib/utils'
@@ -39,7 +39,7 @@ const getMessageStatusIcon = (message) => {
 }
 
 const ChatContainer = () => {
-    const { messages, users = [], selectedUser, setSelectedUser, sendMessage, getMessages, deleteMessage } = useContext(ChatContext)
+    const { messages, users = [], selectedUser, setSelectedUser, sendMessage, getMessages, deleteMessage, isRightSidebarOpen, setIsRightSidebarOpen } = useContext(ChatContext)
     const { authUser, onlineUsers = [], socket } = useContext(AuthContext)
     const scrollEnd = useRef(null)
     const menuRef = useRef(null)
@@ -415,7 +415,8 @@ const ChatContainer = () => {
         setIsSelectionMode(false)
         setSelectedMessageIds([])
         setOpenMenuId(null)
-    }, [selectedUser?._id])
+        setIsRightSidebarOpen(false)
+    }, [selectedUser?._id, setIsRightSidebarOpen])
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -613,6 +614,9 @@ const ChatContainer = () => {
                                 <button type="button" onClick={() => startCall("video")} disabled={!isSelectedUserOnline} className='rounded-full  text-[#54656f] transition hover:bg-[#e9edef] disabled:cursor-not-allowed disabled:opacity-45' title='Video call' aria-label='Start video call'>
                                     <FiVideo className='text-lg' />
                                 </button>
+                                <button type="button" onClick={() => setIsRightSidebarOpen((prev) => !prev)} className={`rounded-full p-2 text-[#54656f] transition hover:bg-[#e9edef] ${isRightSidebarOpen ? 'bg-[#e2f3ef] text-[#008069]' : ''}`} title='Contact info' aria-label='Open contact info'>
+                                    <FiInfo className='text-lg' />
+                                </button>
                                 <button type="button" onClick={() => setIsSelectionMode(true)} className='rounded-full text-[#54656f] transition hover:bg-[#e9edef]' title='Select messages' aria-label='Select messages'>
                                     <FiCheckCircle className='text-lg' />
                                 </button>
@@ -681,19 +685,19 @@ const ChatContainer = () => {
                         <div ref={scrollEnd}></div>
                     </div>
 
-                    <div className='border-t border-[#d1d7db] bg-[#f0f2f5] p-3'>
-                        <div className='flex items-center gap-3'>
-                            <div className='flex flex-1 items-center rounded-[10px] bg-white px-4'>
+                    <div className='border-t border-[#d1d7db] bg-[#f0f2f5] px-2 py-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] sm:p-3'>
+                        <form onSubmit={handleSendMessage} className='flex items-center gap-2 sm:gap-3'>
+                            <div className='flex min-w-0 flex-1 items-center rounded-[12px] bg-white px-3 shadow-[0_1px_2px_rgba(11,20,26,0.08)] sm:px-4'>
                                 <input onChange={handleSendImage} type="file" id="image" accept='image/png, image/jpeg, image/jpg' hidden />
-                                <label htmlFor="image" className='mr-3 cursor-pointer rounded-full p-1.5 text-[#54656f] transition hover:bg-[#f0f2f5]' aria-label='Send image'>
-                                    <FiImage className='text-lg' />
+                                <label htmlFor="image" className='mr-2 shrink-0 cursor-pointer rounded-full p-2 text-[#54656f] transition hover:bg-[#f0f2f5] sm:mr-3' aria-label='Send image'>
+                                    <FiImage className='text-[18px]' />
                                 </label>
-                                <input onChange={(e) => setInput(e.target.value)} value={input} onKeyDown={(e) => e.key === "Enter" ? handleSendMessage(e) : null} type="text" placeholder='Send message...' className='flex-1 bg-transparent py-3 text-[13px] text-[#111b21] outline-none placeholder:text-[#667781]' />
+                                <input onChange={(e) => setInput(e.target.value)} value={input} type="text" placeholder='Send message...' className='min-w-0 flex-1 bg-transparent py-2.5 text-sm text-[#111b21] outline-none placeholder:text-[#667781] sm:py-3' />
                             </div>
-                            <button type="button" onClick={handleSendMessage} className='flex h-10 w-10 items-center justify-center rounded-full bg-[#00a884] font-bold text-lg text-white transition hover:bg-[#00926f]' aria-label='Send message'>
+                            <button type="submit" className='flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#00a884] text-base text-white transition hover:bg-[#00926f] sm:h-10 sm:w-10 sm:text-lg' aria-label='Send message'>
                                 <FiSend />
                             </button>
-                        </div>
+                        </form>
                     </div>
                 </div>
             ) : (

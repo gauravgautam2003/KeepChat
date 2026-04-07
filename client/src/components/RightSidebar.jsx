@@ -1,6 +1,6 @@
 import assets from '../assets/assets'
 import { useContext } from 'react'
-import { FiImage, FiLogOut, FiPhone } from 'react-icons/fi'
+import { FiImage, FiLogOut, FiPhone, FiX } from 'react-icons/fi'
 import { ChatContext } from '../context/ChatContext'
 import { AuthContext } from '../context/AuthContext'
 import { useState } from 'react'
@@ -9,7 +9,7 @@ import { formatLastSeen, formatPhoneNumber } from '../lib/utils'
 
 const RightSidebar = () => {
 
-    const {selectedUser, messages} = useContext(ChatContext)
+    const {selectedUser, messages, isRightSidebarOpen, setIsRightSidebarOpen} = useContext(ChatContext)
     const {onlineUsers, logout} = useContext(AuthContext)
     const [messageImages, setMessageImages] = useState([])
 
@@ -20,10 +20,15 @@ const RightSidebar = () => {
         setMessageImages(images)
     },[messages])
 
-    return selectedUser && (
-        <div className='hidden min-h-0 border-l border-[#d1d7db] bg-[#f0f2f5] text-[#111b21] lg:flex lg:flex-col'>
-            <div className='flex h-[65px] items-center border-b border-[#d1d7db] bg-[#f0f2f5] px-4 py-3'>
+    if (!selectedUser || !isRightSidebarOpen) return null
+
+    const content = (
+        <>
+            <div className='flex h-[65px] items-center justify-between border-b border-[#d1d7db] bg-[#f0f2f5] px-4 py-3'>
                 <p className='text-sm font-medium text-[#41525d]'>Contact info</p>
+                <button type="button" onClick={() => setIsRightSidebarOpen(false)} className='rounded-full p-2 text-[#54656f] transition hover:bg-[#e9edef]' aria-label='Close contact info'>
+                    <FiX className='text-lg' />
+                </button>
             </div>
             <div className='flex-1 min-h-0 overflow-y-auto p-6'>
                 <div className='flex flex-col items-center gap-1 rounded-[10px] bg-white p-6 text-center shadow-[0_1px_3px_rgba(11,20,26,0.08)]'>
@@ -63,7 +68,21 @@ const RightSidebar = () => {
                     Logout
                 </button>
             </div>
-        </div>
+        </>
+    )
+
+    return (
+        <>
+            <div className='fixed inset-0 z-[90] bg-[#0b141a]/36 backdrop-blur-[2px] lg:hidden' onClick={() => setIsRightSidebarOpen(false)}>
+                <div className='ml-auto flex h-full w-full max-w-sm flex-col border-l border-white/35 bg-[#f0f2f5] text-[#111b21] shadow-[-20px_0_60px_rgba(11,20,26,0.22)]' onClick={(event) => event.stopPropagation()}>
+                    {content}
+                </div>
+            </div>
+
+            <div className='hidden min-h-0 border-l border-[#d1d7db] bg-[#f0f2f5] text-[#111b21] lg:flex lg:flex-col'>
+                {content}
+            </div>
+        </>
     )
 }
 

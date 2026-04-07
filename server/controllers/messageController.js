@@ -163,16 +163,34 @@ export const sendMessage = async (req, res) =>{
         const receiverId = req.params.id
         const senderId = req.user._id
 
+        const trimmedText = text?.trim?.() || ""
+
+        if (!receiverId) {
+            return res.status(400).json({ success: false, message: "Receiver is required" })
+        }
+
+        if (!trimmedText && !image) {
+            return res.status(400).json({ success: false, message: "Message cannot be empty" })
+        }
+
+        const receiverUser = await User.findById(receiverId).select("_id")
+        if (!receiverUser) {
+            return res.status(404).json({ success: false, message: "Receiver not found" })
+        }
+
         let imageUrl = ""; // Default to empty string if no image
         if(image){
             const uploadResponse = await uploadOnCloudinary(image) // Changed to match utility name and handle base64
+            if (!uploadResponse) {
+                throw new Error("Image upload failed")
+            }
             imageUrl = uploadResponse
         }
 
         const createdMessage = await Message.create({
             senderId,
             receiverId,
-            text,
+            text: trimmedText,
             image:imageUrl
         })
         const newMessageDoc = await Message.findById(createdMessage._id)
@@ -200,6 +218,7 @@ export const sendMessage = async (req, res) =>{
         }
         return res.json({success:true, newMessage})
     } catch (error) {
-        return res.status(500).json({success:false, error:error.message})
+        console.log("Error sending message:", error);
+        return res.status(500).json({success:false, message:error.message || "Error sending message"})
     }
 }

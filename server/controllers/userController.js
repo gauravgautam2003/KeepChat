@@ -92,7 +92,11 @@ export const updateProfile = async (req, res) => {
             selectedImage = await uploadOnCloudinary(profilePic);
         }
 
-        const normalizedPhone = normalizePhone(phone ?? req.user.phone);
+        if (profilePic && !selectedImage) {
+            throw new Error("Profile image upload failed");
+        }
+
+        const normalizedPhone = normalizePhone(phone ?? req.user.phone ?? "");
         if (phone && normalizedPhone.length < 10) {
             return res.status(400).json({ success: false, message: "Enter a valid mobile number" });
         }
@@ -109,8 +113,8 @@ export const updateProfile = async (req, res) => {
         }
 
         const updatePayload = {
-            name: name || req.user.name,
-            bio: bio || req.user.bio,
+            name: name?.trim() || req.user.name,
+            bio: bio ?? req.user.bio,
             phone: normalizedPhone,
         };
 
@@ -129,6 +133,6 @@ export const updateProfile = async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        return res.status(500).json({ success: false, message: "Error updating profile" });
+        return res.status(500).json({ success: false, message: error.message || "Error updating profile" });
     }
 }
