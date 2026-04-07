@@ -107,8 +107,9 @@ io.on("connection", (socket) => {
     })
 })
 // middleware setup here
+const clientOrigin = process.env.CLIENT_URL?.replace(/\/$/, "") || "https://keep-chat.vercel.app";
 app.use(cors({
-    origin: process.env.CLIENT_URL || "https://keep-chat.vercel.app",
+    origin: clientOrigin,
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
 }));
