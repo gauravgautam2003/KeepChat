@@ -2,12 +2,17 @@ import express from 'express'
 import cors from 'cors'
 import http from 'http'
 import connectDB from './lib/db.js';
-import {Server} from 'socket.io'
+import { Server } from 'socket.io'
 import userRouter from './routes/userRoutes.js';
 import messageRouter from './routes/messageRoutes.js';
 import dotenv from 'dotenv'
+dotenv.config({quiet: true});
+
 import User from './models/user.js';
-dotenv.config();
+import dns from 'dns';
+
+// Set custom DNS servers (Google's public DNS)
+dns.setServers(["8.8.4.4", "8.8.8.8"])
 
 //sever create using express app and HTTP
 const app = express()
@@ -16,7 +21,7 @@ const PORT = process.env.PORT || 5000;
 
 //initialize socket.io
 export const io = new Server(server, {
-    cors: {origin:"*"}
+    cors: { origin: "*" }
 })
 
 //store online users
@@ -31,11 +36,11 @@ const emitToUser = (targetUserId, eventName, payload) => {
 
 io.on("connection", (socket) => {
     const userId = socket.handshake.query.userId
-    
-    if(userId) {
+
+    if (userId) {
         console.log("user Connected", userId)
         // Add new socketId to user's array
-        if(!userSocketMap[userId]){
+        if (!userSocketMap[userId]) {
             userSocketMap[userId] = [];
         }
         userSocketMap[userId].push(socket.id);
@@ -44,7 +49,7 @@ io.on("connection", (socket) => {
             console.log("Error updating active user status", error.message);
         });
     }
-    
+
     // Broadcast online users to all clients
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
@@ -85,13 +90,13 @@ io.on("connection", (socket) => {
     });
 
     socket.on("disconnect", () => {
-        if(userId && userSocketMap[userId]){
+        if (userId && userSocketMap[userId]) {
             console.log("User Disconnected", userId)
             // Remove this specific socketId
             userSocketMap[userId] = userSocketMap[userId].filter(id => id !== socket.id);
-            
+
             // If no more connections left, delete user from map
-            if(userSocketMap[userId].length === 0){
+            if (userSocketMap[userId].length === 0) {
                 delete userSocketMap[userId];
                 User.findByIdAndUpdate(userId, { lastSeen: new Date() }).catch((error) => {
                     console.log("Error updating last seen", error.message);
@@ -105,15 +110,15 @@ io.on("connection", (socket) => {
 app.use(cors({
     origin: process.env.CLIENT_URL || "http://localhost:5173"
 }));
-app.use(express.json({limit:"25mb"}))
-app.use(express.urlencoded({limit: "25mb", extended: true}))
+app.use(express.json({ limit: "25mb" }))
+app.use(express.urlencoded({ limit: "25mb", extended: true }))
 
 //connect db
 await connectDB();
 
-app.use("/api/status",(req,res) => res.send("server is live"))
+app.use("/api/status", (req, res) => res.send("server is live"))
 app.use("/api/auth", userRouter)
-app.use("/api/messages",messageRouter)
+app.use("/api/messages", messageRouter)
 
 
 
