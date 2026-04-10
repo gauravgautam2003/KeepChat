@@ -38,8 +38,8 @@ const App = () => {
             />
             {isRequestProcessing && <RequestLoader message={requestStatusText} />}
             <Routes>
-                <Route path="/" element={authUser ? <HomePage /> : <Navigate to="/login" />} />
-                <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to="/" />} />
+                <Route path="/" element={<HomePage />} />
+                <Route path="/login" element={!authUser ? <LoginPage /> : <HomePage />} />
                 <Route path="/profile" element={authUser ? <ProfilePage /> : <Navigate to="/login" />} />
             </Routes>
         </div>

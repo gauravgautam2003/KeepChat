@@ -2,6 +2,8 @@ import { useContext, useState } from 'react'
 import { FiPhone } from 'react-icons/fi'
 import { AuthContext } from '../context/AuthContext'
 import toast from 'react-hot-toast'
+import { FaArrowLeft } from 'react-icons/fa'
+import { useNavigate } from 'react-router-dom'
 
 
 const LoginPage = () => {
@@ -19,6 +21,8 @@ const LoginPage = () => {
 
     const { login, isRequestProcessing } = useContext(AuthContext);
     const isSignup = currentState === "Sign up";
+
+    const navigate = useNavigate();
 
 
     const onSubmitHandler = async (e) => {
@@ -53,6 +57,7 @@ const LoginPage = () => {
 
     return (
         <div className='screen-shell'>
+            <FaArrowLeft className='absolute top-4 left-4 text-gray-500 cursor-pointer ' onClick={() => {navigate("/"); setIsDataSubmitted(false)}}/>
             <div className='auth-card grid overflow-hidden border border-[#d1d7db] bg-[#f7f8fa] shadow-[0_8px_24px_rgba(11,20,26,0.12)] lg:grid-cols-[minmax(0,1.12fr)_minmax(420px,0.88fr)] lg:rounded-[14px]'>
                 <div className='hidden h-full overflow-y-auto border-r border-[#dfe5e7] bg-[#e7f0e4] p-10 lg:flex lg:flex-col lg:justify-between'>
                     <div className='space-y-6'>
@@ -64,18 +69,18 @@ const LoginPage = () => {
                             </div>
                         </div>
                         <div className='space-y-4'>
-                            <h1 className='max-w-lg text-2xl font-light leading-tight text-[#111b21]'>Simple. Secure. Ready to chat.</h1>
+                            <h1 className='max-w-lg text-2xl font-light leading-tight text-[#111b21]'>You explored the preview. Now unlock real conversations.</h1>
                             <p className='max-w-xl text-sm leading-6 text-[#41525d]'>
-                                Clean sign in and sign up flow like WhatsApp Web, so that users can go directly to conversations.
+                                KeepChat lets visitors understand the website first. Create your account to start messaging, sharing media, and calling for real.
                             </p>
                         </div>
                         <div className='space-y-2 rounded-[12px] border border-[#d1d7db] bg-white p-4 text-xs text-[#41525d]'>
-                            <p>1. Sign in or sign up</p>
-                            <p>2. If the other user opens the site, `Active now` will show</p>
-                            <p>3. Chat will be ready with real-time sync</p>
+                            <p>1. Create your account or sign back in</p>
+                            <p>2. Open any chat you previewed earlier</p>
+                            <p>3. Start messaging with full real-time sync</p>
                         </div>
                     </div>
-                    <p className='text-xs text-[#667781]'>KeepChat works best when both users stay connected, just like WhatsApp Web.</p>
+                    <p className='text-xs text-[#667781]'>Preview mode is read-only. An account unlocks private messaging and live presence.</p>
                 </div>
 
                 <div className='flex h-full items-center justify-center overflow-y-auto bg-[#f7f8fa] p-5 sm:p-8 lg:p-10'>
@@ -93,7 +98,7 @@ const LoginPage = () => {
                                     </button>
                                 )}
                             </h2>
-                            <p className='text-xs text-[#667781]'>Message privately with friends and contacts.</p>
+                            <p className='text-xs text-[#667781]'>Create an account to move from preview mode into real private messaging.</p>
                         </div>
 
                         {isSignup && !isDataSubmitted && (

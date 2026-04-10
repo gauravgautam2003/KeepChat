@@ -6,11 +6,12 @@ import { AuthContext } from '../context/AuthContext'
 import { useState } from 'react'
 import { useEffect } from 'react'
 import { formatLastSeen, formatPhoneNumber } from '../lib/utils'
+import { useNavigate } from 'react-router-dom'
 
 const RightSidebar = () => {
-
-    const {selectedUser, messages, isRightSidebarOpen, setIsRightSidebarOpen} = useContext(ChatContext)
-    const {onlineUsers, logout} = useContext(AuthContext)
+    const navigate = useNavigate()
+    const {selectedUser, messages, isRightSidebarOpen, setIsRightSidebarOpen, isPreviewMode} = useContext(ChatContext)
+    const {onlineUsers, authUser, logout} = useContext(AuthContext)
     const [messageImages, setMessageImages] = useState([])
 
     //get all the images from messages and set them to state
@@ -34,11 +35,11 @@ const RightSidebar = () => {
                 <div className='flex flex-col items-center gap-1 rounded-[10px] bg-white p-6 text-center shadow-[0_1px_3px_rgba(11,20,26,0.08)]'>
                     <img src={selectedUser?.profilePic || assets.avatar_icon} alt="" className='h-24 w-24 rounded-full object-cover' />
                     <h1 className='flex items-center gap-2 text-md font-semibold'>
-                        {(onlineUsers || []).includes(selectedUser._id) && <span className='h-2.5 w-2.5 rounded-full bg-[#25d366]'></span>}
+                        {((onlineUsers || []).includes(selectedUser._id) || selectedUser?.isPreviewOnline) && <span className='h-2.5 w-2.5 rounded-full bg-[#25d366]'></span>}
                         {selectedUser.name}
                     </h1>
-                    <p className={`text-xs ${(onlineUsers || []).includes(selectedUser._id) ? 'text-[#00a884]' : 'text-[#667781]'}`}>
-                        {(onlineUsers || []).includes(selectedUser._id) ? 'Active now' : formatLastSeen(selectedUser.lastSeen)}
+                    <p className={`text-xs ${((onlineUsers || []).includes(selectedUser._id) || selectedUser?.isPreviewOnline) ? 'text-[#00a884]' : 'text-[#667781]'}`}>
+                        {((onlineUsers || []).includes(selectedUser._id) || selectedUser?.isPreviewOnline) ? 'Active now' : formatLastSeen(selectedUser.lastSeen)}
                     </p>
                     <p className='text-xs leading-6 text-[#667781]'>{selectedUser.bio || "No status added yet."}</p>
                     <div className='flex items-center gap-2 rounded-full bg-[#f0f2f5] px-3 py-1.5 text-xs text-[#41525d]'>
@@ -63,10 +64,13 @@ const RightSidebar = () => {
                         )}
                     </div>
                 </div>
-                <button onClick={() => logout()} className='mt-6 flex w-full items-center justify-center gap-2 rounded-[10px] bg-white px-4 py-3 text-sm font-medium text-[#c65353] shadow-[0_1px_3px_rgba(11,20,26,0.08)] transition hover:bg-[#fff5f5]'>
+                {isPreviewMode && <button onClick={() => navigate("/login")} className='mt-6 flex w-full items-center justify-center gap-2 rounded-[10px] bg-[#111b21] px-4 py-3 text-sm font-medium text-white shadow-[0_1px_3px_rgba(11,20,26,0.08)] transition hover:bg-[#1d2a32]'>
+                    Create account
+                </button>}
+                {authUser?._id && <button onClick={() => logout()} className='mt-6 flex w-full items-center justify-center gap-2 rounded-[10px] bg-white px-4 py-3 text-sm font-medium text-[#c65353] shadow-[0_1px_3px_rgba(11,20,26,0.08)] transition hover:bg-[#fff5f5]'>
                     <FiLogOut />
                     Logout
-                </button>
+                </button>}
             </div>
         </>
     )

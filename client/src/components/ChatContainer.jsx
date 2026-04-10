@@ -4,6 +4,7 @@ import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import { BsCheck2, BsCheck2All } from 'react-icons/bs'
 import { FiArrowLeft, FiCheck, FiCheckCircle, FiCircle, FiImage, FiInfo, FiMoreVertical, FiPhone, FiSend, FiTrash2, FiVideo } from 'react-icons/fi'
+import { useNavigate } from 'react-router-dom'
 import assets from '../assets/assets'
 import CallOverlay from './CallOverlay'
 import { formatLastSeen, formatMessageTime } from '../lib/utils'
@@ -39,7 +40,8 @@ const getMessageStatusIcon = (message) => {
 }
 
 const ChatContainer = () => {
-    const { messages, users = [], selectedUser, setSelectedUser, sendMessage, getMessages, deleteMessage, isRightSidebarOpen, setIsRightSidebarOpen } = useContext(ChatContext)
+    const navigate = useNavigate()
+    const { messages, users = [], selectedUser, setSelectedUser, sendMessage, getMessages, deleteMessage, isRightSidebarOpen, setIsRightSidebarOpen, isPreviewMode, viewerProfile } = useContext(ChatContext)
     const { authUser, onlineUsers = [], socket } = useContext(AuthContext)
     const scrollEnd = useRef(null)
     const menuRef = useRef(null)
@@ -61,20 +63,39 @@ const ChatContainer = () => {
     const [isMicMuted, setIsMicMuted] = useState(false)
     const [isCameraOff, setIsCameraOff] = useState(false)
     const selectedUserId = normalizeId(selectedUser?._id)
-    const authUserId = normalizeId(authUser?._id)
-    const isSelectedUserOnline = onlineUsers.some((userId) => normalizeId(userId) === selectedUserId)
+    const authUserId = normalizeId(authUser?._id || viewerProfile?._id)
+    const isSelectedUserOnline = isPreviewMode
+        ? Boolean(selectedUser?.isPreviewOnline)
+        : onlineUsers.some((userId) => normalizeId(userId) === selectedUserId)
     const selectedMessages = messages.filter((msg) => selectedMessageIds.includes(normalizeId(msg._id)))
     const canDeleteSelectedForEveryone = selectedMessages.length > 0 && selectedMessages.every((msg) => normalizeId(msg.senderId) === authUserId)
 
+    const promptCreateAccount = useCallback(() => {
+        toast.error("Please create your account")
+    }, [])
+
     const handleSendMessage = async (e) => {
         e.preventDefault()
+        if (isPreviewMode) {
+            promptCreateAccount()
+            return null
+        }
         if (input.trim() === "") return null
 
-        await sendMessage({ text: input.trim() })
-        setInput("")
+        const didSend = await sendMessage({ text: input.trim() })
+        if (didSend) {
+            setInput("")
+        }
     }
 
     const handleSendImage = async (e) => {
+        if (isPreviewMode) {
+            e.preventDefault()
+            e.target.value = ""
+            promptCreateAccount()
+            return
+        }
+
         const file = e.target.files[0]
 
         if (!file || !file.type.startsWith("image/")) {
@@ -84,8 +105,10 @@ const ChatContainer = () => {
 
         const reader = new FileReader()
         reader.onloadend = async () => {
-            await sendMessage({ image: reader.result })
-            e.target.value = ""
+            const didSend = await sendMessage({ image: reader.result })
+            if (didSend) {
+                e.target.value = ""
+            }
         }
         reader.readAsDataURL(file)
     }
@@ -208,7 +231,7 @@ const ChatContainer = () => {
         connection.ontrack = (event) => {
             event.streams.forEach((stream) => {
                 stream.getTracks().forEach((track) => {
-                    const alreadyExists = remoteStreamRef.current.getTracks().some((existingTrack) => existingTrack.id === track.id)
+                    const alreadyExists = remoteStreamRef.current.getTracks().some((existingTrack) => existingTrack.id === track.id)  
                     if (!alreadyExists) {
                         remoteStreamRef.current.addTrack(track)
                     }
@@ -296,6 +319,11 @@ const ChatContainer = () => {
     }, [resetCallState, socket])
 
     const startCall = useCallback(async (callType) => {
+        if (isPreviewMode) {
+            promptCreateAccount()
+            return
+        }
+
         if (!selectedUser?._id || !socket) return
 
         if (callSessionRef.current.phase !== "idle") {
@@ -340,7 +368,7 @@ const ChatContainer = () => {
             resetCallState()
             toast.error(error.message || "Unable to start call")
         }
-    }, [addLocalTracksToConnection, authUser?._id, authUser?.name, authUser?.phone, authUser?.profilePic, createPeerConnection, isSelectedUserOnline, prepareLocalStream, resetCallState, selectedUser, selectedUserId, socket])
+    }, [addLocalTracksToConnection, authUser?._id, authUser?.name, authUser?.phone, authUser?.profilePic, createPeerConnection, isPreviewMode, isSelectedUserOnline, prepareLocalStream, promptCreateAccount, resetCallState, selectedUser, selectedUserId, socket])
 
     const acceptIncomingCall = useCallback(async () => {
         const activeCall = callSessionRef.current
@@ -556,6 +584,11 @@ const ChatContainer = () => {
     }
 
     const handleBulkDelete = async (mode) => {
+        if (isPreviewMode) {
+            promptCreateAccount()
+            return
+        }
+
         if (!selectedMessageIds.length) return
         await deleteMessage(selectedMessageIds, mode)
         resetSelection()
@@ -586,7 +619,7 @@ const ChatContainer = () => {
                                     <FiArrowLeft className='text-lg text-[#54656f]' />
                                 </button>
                                 <div className='min-w-0 flex-1'>
-                                    <p className='truncate text-sm font-medium'>🧹 {selectedMessageIds.length} selected</p>
+                                    <p className='truncate text-sm font-medium'>{selectedMessageIds.length} selected</p>
                                     <p className='text-xs text-[#667781]'>Messages from both left and right sides can be selected.</p>
                                 </div>
                                 <button type="button" onClick={() => handleBulkDelete("me")} className='rounded-full p-2 text-[#54656f] transition hover:bg-[#e9edef]' title='Delete for me' aria-label='Delete selected messages for me'>
@@ -606,18 +639,18 @@ const ChatContainer = () => {
                                 <img src={selectedUser.profilePic || assets.avatar_icon} alt={selectedUser.name} className='h-10 w-10 rounded-full object-cover' />
                                 <div className='min-w-0 flex-1'>
                                     <p className='truncate text-sm font-medium'>{selectedUser.name}</p>
-                                    <p className={`text-xs ${isSelectedUserOnline ? 'text-[#00a884]' : 'text-[#667781]'}`}>{isSelectedUserOnline ? '🟢 Active now' : formatLastSeen(selectedUser.lastSeen)}</p>
+                                    <p className={`text-xs ${isSelectedUserOnline ? 'text-[#00a884]' : 'text-[#667781]'}`}>{isSelectedUserOnline ? 'Active now' : formatLastSeen(selectedUser.lastSeen)}</p>
                                 </div>
-                                <button type="button" onClick={() => startCall("audio")} disabled={!isSelectedUserOnline} className='rounded-full  text-[#54656f] transition hover:bg-[#e9edef] disabled:cursor-not-allowed disabled:opacity-45' title='Voice call' aria-label='Start voice call'>
+                                <button type="button" onClick={() => startCall("audio")} disabled={!isPreviewMode && !isSelectedUserOnline} className='rounded-full  text-[#54656f] transition hover:bg-[#e9edef] disabled:cursor-not-allowed disabled:opacity-45' title={isPreviewMode ? 'Create an account to call' : 'Voice call'} aria-label='Start voice call'>
                                     <FiPhone className='text-lg' />
                                 </button>
-                                <button type="button" onClick={() => startCall("video")} disabled={!isSelectedUserOnline} className='rounded-full  text-[#54656f] transition hover:bg-[#e9edef] disabled:cursor-not-allowed disabled:opacity-45' title='Video call' aria-label='Start video call'>
+                                <button type="button" onClick={() => startCall("video")} disabled={!isPreviewMode && !isSelectedUserOnline} className='rounded-full  text-[#54656f] transition hover:bg-[#e9edef] disabled:cursor-not-allowed disabled:opacity-45' title={isPreviewMode ? 'Create an account to call' : 'Video call'} aria-label='Start video call'>
                                     <FiVideo className='text-lg' />
                                 </button>
                                 <button type="button" onClick={() => setIsRightSidebarOpen((prev) => !prev)} className={`rounded-full p-2 text-[#54656f] transition hover:bg-[#e9edef] ${isRightSidebarOpen ? 'bg-[#e2f3ef] text-[#008069]' : ''}`} title='Contact info' aria-label='Open contact info'>
                                     <FiInfo className='text-lg' />
                                 </button>
-                                <button type="button" onClick={() => setIsSelectionMode(true)} className='rounded-full text-[#54656f] transition hover:bg-[#e9edef]' title='Select messages' aria-label='Select messages'>
+                                <button type="button" onClick={() => isPreviewMode ? promptCreateAccount() : setIsSelectionMode(true)} className='rounded-full text-[#54656f] transition hover:bg-[#e9edef]' title={isPreviewMode ? 'Create an account to manage messages' : 'Select messages'} aria-label='Select messages'>
                                     <FiCheckCircle className='text-lg' />
                                 </button>
                             </>
@@ -668,7 +701,7 @@ const ChatContainer = () => {
                                         <div className={`min-w-0 rounded-[10px] px-3 py-1.5 ${isOwnMessage && !isSelectionMode ? 'pr-11' : ''} text-[13px] shadow-[0_1px_0.5px_rgba(11,20,26,0.13)] ${isSelected ? 'ring-2 ring-[#00a884]/35' : ''} ${isOwnMessage ? 'rounded-tr-sm bg-[#d9fdd3] text-[#111b21]' : 'rounded-tl-sm bg-white text-[#111b21]'}`}>
                                             {!msg.isDeleted && msg.image && <img src={msg.image} alt="Shared media" className='mb-2 block h-auto max-h-72 w-[220px] max-w-full rounded-[8px] object-cover sm:w-[280px]' />}
                                             {msg.isDeleted ? (
-                                                <p className='italic text-[#667781]'>🚫 This message was deleted</p>
+                                                <p className='italic text-[#667781]'>This message was deleted</p>
                                             ) : (
                                                 msg.text && <p className='break-words whitespace-pre-wrap leading-6'>{msg.text}</p>
                                             )}
@@ -686,18 +719,31 @@ const ChatContainer = () => {
                     </div>
 
                     <div className='border-t border-[#d1d7db] bg-[#f0f2f5] px-2 py-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] sm:p-3'>
+                        {isPreviewMode && (
+                            <div className='mb-2 rounded-[12px] border border-[#bce5d7] bg-[#ecfff7] px-4 py-3 text-xs text-[#0b5f4f]'>
+                                Preview mode is active. You can explore the UI, but sending a message will ask you to create your account.
+                            </div>
+                        )}
                         <form onSubmit={handleSendMessage} className='flex items-center gap-2 sm:gap-3'>
                             <div className='flex min-w-0 flex-1 items-center rounded-[12px] bg-white px-3 shadow-[0_1px_2px_rgba(11,20,26,0.08)] sm:px-4'>
                                 <input onChange={handleSendImage} type="file" id="image" accept='image/png, image/jpeg, image/jpg' hidden />
-                                <label htmlFor="image" className='mr-2 shrink-0 cursor-pointer rounded-full p-2 text-[#54656f] transition hover:bg-[#f0f2f5] sm:mr-3' aria-label='Send image'>
+                                <label htmlFor="image" onClick={isPreviewMode ? (event) => { event.preventDefault(); promptCreateAccount() } : undefined} className='mr-2 shrink-0 cursor-pointer rounded-full p-2 text-[#54656f] transition hover:bg-[#f0f2f5] sm:mr-3' aria-label='Send image'>
                                     <FiImage className='text-[18px]' />
                                 </label>
-                                <input onChange={(e) => setInput(e.target.value)} value={input} type="text" placeholder='Send message...' className='min-w-0 flex-1 bg-transparent py-2.5 text-sm text-[#111b21] outline-none placeholder:text-[#667781] sm:py-3' />
+                                <input onChange={(e) => { if (!isPreviewMode) setInput(e.target.value) }} onFocus={isPreviewMode ? promptCreateAccount : undefined} value={input} readOnly={isPreviewMode} type="text" placeholder={isPreviewMode ? 'Please create your account to start messaging' : 'Send message...'} className='min-w-0 flex-1 bg-transparent py-2.5 text-sm text-[#111b21] outline-none placeholder:text-[#667781] sm:py-3' />
                             </div>
-                            <button type="submit" className='flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#00a884] text-base text-white transition hover:bg-[#00926f] sm:h-10 sm:w-10 sm:text-lg' aria-label='Send message'>
+                            <button type="submit" onClick={isPreviewMode ? promptCreateAccount : undefined} className='flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#00a884] text-base text-white transition hover:bg-[#00926f] sm:h-10 sm:w-10 sm:text-lg' aria-label='Send message'>
                                 <FiSend />
                             </button>
                         </form>
+                        {isPreviewMode && (
+                            <div className='mt-3 flex items-center justify-between gap-3 rounded-[12px] bg-[#1871a8] px-4 py-3 text-xs text-white/85'>
+                                <p className='leading-5'>Want to send messages for real? Create your account to unlock chats, media, and calls.</p>
+                                <button type="button" onClick={() => navigate("/login")} className='shrink-0 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-[#111b21] transition hover:bg-[#ecfff7]'>
+                                    Create account
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             ) : (
